@@ -22,10 +22,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   final Site pSite;
   final String pRoomId;
   late LiveDanmaku liveDanmaku;
-  LiveRoomController({
-    required this.pSite,
-    required this.pRoomId,
-  }) {
+  LiveRoomController({required this.pSite, required this.pRoomId}) {
     rxSite = pSite.obs;
     rxRoomId = pRoomId.obs;
     liveDanmaku = site.liveSite.getDanmaku();
@@ -91,6 +88,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     //messages.clear();
 
     liveDanmaku.stop();
+    danmakuController?.clear();
+    danmakuController = null;
+    danmakuView = null;
 
     loadData();
   }
@@ -172,8 +172,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     qualites.clear();
     currentQuality = -1;
     try {
-      var playQualites =
-          await site.liveSite.getPlayQualites(detail: detail.value!);
+      var playQualites = await site.liveSite.getPlayQualites(
+        detail: detail.value!,
+      );
 
       if (playQualites.isEmpty) {
         SmartDialog.showToast("无法读取播放清晰度");
@@ -205,8 +206,10 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     currentQualityInfo.value = qualites[currentQuality].quality;
     currentLineInfo.value = "";
     currentLineIndex = -1;
-    var playUrl = await site.liveSite
-        .getPlayUrls(detail: detail.value!, quality: qualites[currentQuality]);
+    var playUrl = await site.liveSite.getPlayUrls(
+      detail: detail.value!,
+      quality: qualites[currentQuality],
+    );
     if (playUrl.urls.isEmpty) {
       SmartDialog.showToast("无法读取播放地址");
       return;
@@ -232,12 +235,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     errorMsg.value = "";
     // 初始化播放器并设置 ao 参数
     await initializePlayer();
-    player.open(
-      Media(
-        playUrls[currentLineIndex],
-        httpHeaders: playHeaders,
-      ),
-    );
+    player.open(Media(playUrls[currentLineIndex], httpHeaders: playHeaders));
 
     Log.d("播放链接\r\n：${playUrls[currentLineIndex]}");
   }
@@ -361,8 +359,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     // 清除全部消息
     liveDanmaku.stop();
-
     danmakuController?.clear();
+    danmakuController = null;
+    danmakuView = null;
 
     // 重新设置LiveDanmaku
     liveDanmaku = site.liveSite.getDanmaku();
@@ -381,8 +380,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("没有正在直播的频道");
       return;
     }
-    var index = liveChannels
-        .indexWhere((element) => element.id == "${site.id}_$roomId");
+    var index = liveChannels.indexWhere(
+      (element) => element.id == "${site.id}_$roomId",
+    );
     // if (index == -1) {
     //   //当前频道不在列表中
 
@@ -404,8 +404,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
       SmartDialog.showToast("没有正在直播的频道");
       return;
     }
-    var index = liveChannels
-        .indexWhere((element) => element.id == "${site.id}_$roomId");
+    var index = liveChannels.indexWhere(
+      (element) => element.id == "${site.id}_$roomId",
+    );
     // if (index == -1) {
     //   //当前频道不在列表中
 
@@ -434,6 +435,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       Log.d("返回前台");
       isBackground = false;
+      // 重置弹幕控制器和视图以重启canvas渲染
+      danmakuController = null;
+      danmakuView = null;
     }
   }
 
