@@ -47,6 +47,9 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
   late Rx<String> rxRoomId;
   String get roomId => rxRoomId.value;
 
+  /// 用于触发弹幕视图重建的计数器
+  var danmakuRebuildTrigger = 0.obs;
+
   Rx<LiveRoomDetail?> detail = Rx<LiveRoomDetail?>(null);
   var online = 0.obs;
   var followed = false.obs;
@@ -182,6 +185,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     superChats.clear();
     liveDanmaku.stop();
     danmakuController?.clear();
+    // 触发弹幕视图重建
+    danmakuRebuildTrigger.value++;
     danmakuController = null;
     danmakuView = null;
 
@@ -978,6 +983,8 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
     messages.clear();
     superChats.clear();
     danmakuController?.clear();
+    // 触发弹幕视图重建
+    danmakuRebuildTrigger.value++;
     danmakuController = null;
     danmakuView = null;
 
@@ -1015,7 +1022,8 @@ ${error?.stackTrace}''');
     if (state == AppLifecycleState.resumed) {
       Log.d("返回前台");
       isBackground = false;
-      // 重置弹幕控制器和视图以重启canvas渲染
+      // 触发弹幕视图重建，重启canvas渲染
+      danmakuRebuildTrigger.value++;
       danmakuController = null;
       danmakuView = null;
     }
