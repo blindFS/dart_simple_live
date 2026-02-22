@@ -991,6 +991,7 @@ class LiveRoomController extends PlayerController with WidgetsBindingObserver {
 
     // 刷新信息
     loadData();
+    danmakuController?.resume();
   }
 
   void copyErrorDetail() {
@@ -1016,6 +1017,7 @@ ${error?.stackTrace}''');
     //返回前台
     if (state == AppLifecycleState.resumed) {
       Log.d("返回前台");
+      danmakuController?.resume();
       isBackground = false;
     }
   }
